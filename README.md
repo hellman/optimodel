@@ -23,13 +23,16 @@ pip install optimodel
 
 The tool uses both SAT-solvers and MILP-optimizers, so you need to install something that is supported by the [optisolveapi](https://github.com/hellman/optisolveapi) module (currently, not much..). The simplest is to install [PySAT](https://pysathq.github.io/) and [GLPK]() with low-level python bindings [swiglpk](https://github.com/biosustain/swiglpk):
 
+**Note:** currently, they are listed as requirements for optisolveapi and will be installed automatically.
+
 ```bash
 apt install glpk-utils libglpk-dev  # not sure if needed
 pip install python-sat[pblib,aiger] swiglpk
 ```
 
-GLPK however won't work well for the final minimzation step for large functions.
-It is recommended to use Gurobi or SCIP.
+### Minimization part
+
+GLPK however won't work well for the final minimzation step for large functions. It is recommended to use Gurobi or SCIP.
 
 Note that it is possible to write the LP file and solve manually with any external solver.
 
