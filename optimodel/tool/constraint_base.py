@@ -1,3 +1,5 @@
+from monolearn.utils import TimeStat
+
 from optimodel.tool.base import BaseTool
 
 
@@ -47,6 +49,7 @@ class ConstraintTool(BaseTool):
     lp_written = None
     meta_written = None
 
+    @TimeStat.log
     def AutoSelect(self):
         n_sets = len(self.pool.constraints)
         n_vars = len(self.pool.exclude)
@@ -65,14 +68,17 @@ class ConstraintTool(BaseTool):
         self.log.info("using AutoLarge preset")
         return self.AutoLarge()
 
+    @TimeStat.log
     def AutoSmall(self):
         for cmd in AutoSmall:
             self.run_command_string(cmd)
 
+    @TimeStat.log
     def AutoMedium(self):
         for cmd in AutoSmall:
             self.run_command_string(cmd)
 
+    @TimeStat.log
     def AutoLarge(self):
         for cmd in AutoLarge:
             self.run_command_string(cmd)
@@ -85,6 +91,7 @@ class ConstraintTool(BaseTool):
             self.pool.write_subset_meta(filename=filename)
             self.meta_written = filename
 
+    @TimeStat.log
     def SubsetWriteGecco(self):
         self._write_meta()
 
@@ -92,6 +99,7 @@ class ConstraintTool(BaseTool):
         self.pool.write_subset_gecco(filename=filename)
         self.gecco_written = filename
 
+    @TimeStat.log
     def SubsetWriteMILP(self, *args, **kwargs):
         self._write_meta()
 
@@ -101,12 +109,15 @@ class ConstraintTool(BaseTool):
 
     # ================================
 
+    @TimeStat.log
     def SubsetFull(self):
         self.pool.subset_all()
 
+    @TimeStat.log
     def SubsetMILP(self, *args, **kwargs):
         self.pool.subset_by_milp(*args, **kwargs)
 
+    @TimeStat.log
     def SubsetSCS(self, *args, **kwargs):
         if not self.gecco_written:
             self.SubsetWriteGecco()
@@ -142,3 +153,12 @@ class ConstraintTool(BaseTool):
     #     self.log.info(f"best: {best[0]} inequalities")
     #     assert best[1] is not None
     #     return best[1]
+
+    # =======================================
+
+    def log_time_stats(self, header):
+        maxlen = max(map(len, TimeStat.Stat))
+        self.log.info(f"timing {header}")
+        for name, ts in TimeStat.Stat.items():
+            if ts:
+                self.log.info(f"{name.rjust(maxlen+3)} {ts}")

@@ -6,6 +6,7 @@ from time import time
 
 from binteger import Bin
 from monolearn.SparseSet import SparseSet
+from monolearn.utils import TimeStat
 
 from subsets.misc import Quine_McCluskey_Step1_Dense2
 from subsets.misc import Quine_McCluskey_Step1_Dense3
@@ -140,6 +141,9 @@ class ToolQMC(ConstraintTool):
         for cmd in commands:
             self.run_command_string(cmd)
 
+        self.log_time_stats(header="Finished")
+
+    @TimeStat.log
     def QmC(self, algorithm="Dense3", checks=True):
         if algorithm == "Sparse":
             raise NotImplementedError(
@@ -159,7 +163,7 @@ class ToolQMC(ConstraintTool):
 
         self.log.info(f"calling Quine-McCluskey algorithm {QMC.__name__}")
         t0 = time()
-        cubes = QMC(self.cubespace)
+        cubes = TimeStat(QMC)(self.cubespace)
         t = time() - t0
         self.log.info("done Quine-McCluskey")
         self.log.info(

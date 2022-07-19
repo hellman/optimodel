@@ -4,6 +4,7 @@ import argparse
 from argparse import RawTextHelpFormatter
 
 from monolearn import Modules as LearnModules
+from monolearn.utils import TimeStat
 
 from optimodel.constraint_pool import ConstraintPool
 from optimodel.shift_learn import ShiftLearn
@@ -142,6 +143,9 @@ class ToolMILP(ConstraintTool):
         for cmd in commands:
             self.run_command_string(cmd)
 
+        self.log_time_stats(header="Finished")
+
+
     def Chain(self, module, *args, **kwargs):
         self.chain.append((module, args, kwargs))
 
@@ -164,6 +168,9 @@ class ToolMILP(ConstraintTool):
         self.module.init(system=self.pool.system, oracle=self.oracle)
         self.module.learn()
 
+        self.log_time_stats(header=f"Learn:{module}")
+
+    @TimeStat.log
     def ShiftLearn(self, threads):
         path = self.fileprefix + "shifts"
         os.makedirs(path, exist_ok=True)
