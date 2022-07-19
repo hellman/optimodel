@@ -1,4 +1,4 @@
-import os
+from time import time
 
 
 class BaseTool:
@@ -7,28 +7,13 @@ class BaseTool:
 
     def run_command_string(self, cmd):
         method, args, kwargs = parse_method(cmd)
+        t0 = time()
+        self.log.info("\n")
+        self.log.info("=" * 40)
         self.log.info(f"running command {method} {args} {kwargs}")
         ret = getattr(self, method)(*args, **kwargs)
-        self.log.info(f"command {method} returned {ret}")
-
-    def save(self, constraints, kind, limit=50):
-        filename = f"{self.output_prefix}.{len(constraints)}"
-
-        if os.path.exists(filename):
-            self.log.warning(f"file {filename} exists, skipping overwrite!")
-        else:
-            self.log.info(f"saving {len(constraints)} {kind} to {filename}")
-            with open(filename, "w") as f:
-                print(len(constraints), file=f)
-                for eq in constraints:
-                    print(*eq, file=f)
-            self.log.info(f"saved {len(constraints)} {kind} to {filename}")
-
-        if len(constraints) < 50:
-            self.log.info(f"{kind} ({len(constraints)}):")
-            for ineq in constraints:
-                self.log.info(f"{ineq}")
-            self.log.info("end")
+        t = time() - t0
+        self.log.info(f"command {method} returned {ret} in {t:.2f} seconds")
 
 
 def parse_method(s):
@@ -98,3 +83,18 @@ def parse_value(s: str):
     if s == "True":
         return True
     return s
+
+
+def complement_binary(s: set[tuple[int]]):
+    for v in s:
+        n = len(v)
+        break
+    else:
+        raise ValueError("unknown dimension (empty set)")
+
+    s = {Bin(v, n).int for v in s}
+    s2 = set()
+    for x in range(2**n):
+        if x not in s:
+            s2.add(Bin(x, n).tuple)
+    return s2

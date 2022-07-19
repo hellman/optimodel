@@ -1,6 +1,3 @@
-from binteger import Bin
-
-
 class Inequality(tuple):
     """Inequality wrapper
 
@@ -13,18 +10,19 @@ class Inequality(tuple):
         assert len(pt) + 1 == len(self)
         return inner(pt, self) + self[-1] >= 0
 
-    def shift(self, shift: Bin):
-        shift = shift.tuple
-        assert len(self) == len(shift) + 1
+    def reorient(self, direction: tuple):
+        assert len(self) == len(direction) + 1
 
         val = self[-1]
         ineq2 = []
-        for a, s in zip(self, shift):
-            if s:
+        for a, s in zip(self, direction):
+            if s == -1:
                 ineq2.append(-a)
                 val += a
-            else:
+            elif s == 1:
                 ineq2.append(a)
+            else:
+                raise ValueError(s)
         ineq2.append(val)
         return Inequality(ineq2)
 

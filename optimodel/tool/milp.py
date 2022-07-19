@@ -1,17 +1,20 @@
 import os
-import sys
 
 import argparse
 from argparse import RawTextHelpFormatter
 
 from monolearn import Modules as LearnModules
 
-from optimodel.pool import ConstraintPool
+from optimodel.constraint_pool import ConstraintPool
 from optimodel.shift_learn import ShiftLearn
-from optimodel.lp_oracle import LPbasedOracle, LPXbasedOracle
-from optimodel.tool import BaseTool
+from optimodel.lp_oracle import LPbasedOracle
+from optimodel.inequality import Inequality
 
-import justlogs, logging
+from optimodel.tool.constraint_base import ConstraintTool
+from optimodel.tool.set_files import read_set, SetType, TypeGood
+
+import justlogs
+import logging
 
 # sage/pure python compatibility
 try:
@@ -19,12 +22,6 @@ try:
 except ImportError:
     pass
 
-
-AutoSelect = (
-    "SubsetGreedy:",
-    "SubsetWriteMILP:solver=sage/glpk",
-    "SubsetMILP:solver=sage/glpk",
-)
 
 AutoSimple = (
     "Learn:LevelLearn,levels_lower=3",
@@ -46,20 +43,19 @@ AutoShifts = (
 )
 
 
-class ToolMILP(BaseTool):
+class ToolMILP(ConstraintTool):
+    KIND = "ineq"
+
     log = logging.getLogger(__name__)
 
     def main(self):
-        TOOL = os.path.basename(sys.argv[0])
-
         justlogs.setup(level="INFO")
 
         parser = argparse.ArgumentParser(description=f"""
     Generate inequalities to model a set.
     AutoSimple: alias for
         {" ".join(AutoSimple)}
-    AutoSelect: alias for
-        {" ".join(AutoSelect)}
+    AutoSelect: alias for automatic subset selection (depends on system's size)
     AutoShifts: alias for
         {" ".join(AutoShifts)}
     AutoChain: alias for
@@ -79,30 +75,63 @@ class ToolMILP(BaseTool):
         args = self.args = parser.parse_args()
 
         self.fileprefix = args.fileprefix
+        if os.path.isdir(self.fileprefix):
+            self.fileprefix += "/"
 
-        assert os.path.exists(self.fileprefix + ".good.set")
-        assert os.path.exists(self.fileprefix + ".bad.set")
-        assert os.path.exists(self.fileprefix + ".type_good")
+        self.output_prefix = self.fileprefix + "ineq."
+        self.log.info(f"using output prefix {self.output_prefix}")
 
-        justlogs.addFileHandler(self.fileprefix + f".log.{TOOL}")
-
+        justlogs.addFileHandler(self.fileprefix + "log")
         self.log.info(args)
 
-        self.pool = ConstraintPool.from_DenseSet_files(
-            fileprefix=self.fileprefix,
+        self.sysfile = self.output_prefix + "system"
+
+        include = read_set(self.fileprefix + "include")
+        exclude = read_set(self.fileprefix + "exclude")
+        typ = SetType.read_from_file(self.fileprefix + "type")
+
+        for v in exclude:
+            n = len(v)
+            break
+        else:
+            raise ValueError("exclude should be nonempty")
+
+        self.log.info(f"set type: {typ}, n {n}")
+
+        if typ.type_good == TypeGood.UPPER:
+            direction = None
+            is_upper = True
+            self.log.info("monotone UPPER set")
+        elif typ.type_good == TypeGood.LOWER:
+            direction = (-1,)*n
+            is_upper = True
+            self.log.info("monotone LOWER set, reorienting to an upper set")
+        elif typ.type_good == TypeGood.EXPLICIT:
+            direction = None
+            is_upper = False
+            self.log.info("EXPLICIT set")
+        else:
+            raise NotImplementedError(typ)
+
+        self.pool = ConstraintPool(
+            include=include,
+            exclude=exclude,
+            direction=direction,
+            is_upper=is_upper,
+            use_point_prec=False,
+            sysfile=self.sysfile,
+            output_prefix=self.output_prefix,
+            constraint_class=Inequality,
         )
-        self.oracle = LPXbasedOracle(pool=self.pool)
+        self.oracle = LPbasedOracle(pool=self.pool)
 
         commands = args.commands
-        if self.pool.is_monotone:
+        if self.pool.is_upper:
             commands = commands or AutoSimple
         else:
             commands = commands or AutoShifts
 
         self.log.info(f"commands: {' '.join(commands)}")
-
-        self.output_prefix = args.fileprefix + ".ineqs"
-        self.log.info(f"using output prefix {self.output_prefix}")
 
         self.chain = []
 
@@ -120,10 +149,6 @@ class ToolMILP(BaseTool):
         for cmd in AutoShifts:
             self.run_command_string(cmd)
 
-    def AutoSelect(self):
-        for cmd in AutoSelect:
-            self.run_command_string(cmd)
-
     def AutoChain(self):
         for cmd in AutoChain:
             self.run_command_string(cmd)
@@ -136,7 +161,7 @@ class ToolMILP(BaseTool):
         self.module.learn()
 
     def ShiftLearn(self, threads):
-        path = self.fileprefix + ".shifts"
+        path = self.fileprefix + "shifts"
         os.makedirs(path, exist_ok=True)
         sl = ShiftLearn(
             pool=self.pool,
@@ -145,23 +170,6 @@ class ToolMILP(BaseTool):
         )
         sl.process_all_shifts(threads=threads)
         sl.compose()
-
-    def SubsetGreedy(self, *args, **kwargs):
-        res = self.pool.choose_subset_greedy(*args, **kwargs)
-        self.save(res, kind="inequalities", limit=50)
-
-    def SubsetMILP(self, *args, **kwargs):
-        res = self.pool.choose_subset_milp(*args, **kwargs)
-        self.save(res, kind="inequalities", limit=50)
-
-    def SubsetWriteMILP(self, *args, **kwargs):
-        prefix = self.fileprefix + ".lp"
-        os.makedirs(prefix, exist_ok=True)
-        filename = os.path.join(prefix, "full.lp")
-
-        self.pool.write_subset_milp(filename=filename, **kwargs)
-
-    #     "Polyhedron": NotImplemented,
 
 
 def main():
