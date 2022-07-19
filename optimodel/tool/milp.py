@@ -13,6 +13,8 @@ from optimodel.inequality import Inequality
 from optimodel.tool.constraint_base import ConstraintTool
 from optimodel.tool.set_files import read_set, SetType, TypeGood
 
+from optisolveapi.milp import MILP
+
 import justlogs
 import logging
 
@@ -79,10 +81,12 @@ class ToolMILP(ConstraintTool):
             self.fileprefix += "/"
 
         self.output_prefix = self.fileprefix + "ineq."
-        self.log.info(f"using output prefix {self.output_prefix}")
 
         justlogs.addFileHandler(self.fileprefix + "log")
+        self.log.debug(f"MILP solver: {MILP.DEFAULT_SOLVER}")  # causes the choice to be logged
+
         self.log.info(args)
+        self.log.info(f"using output prefix {self.output_prefix}")
 
         self.sysfile = self.output_prefix + "system"
 
