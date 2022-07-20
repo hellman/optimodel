@@ -42,7 +42,7 @@ class Format(Enum):
     DNF = "dnf"
 
 
-class ToolQMC(ConstraintTool):
+class ToolBoolean(ConstraintTool):
     KIND = "clause"
 
     log = logging.getLogger(__name__)
@@ -124,7 +124,7 @@ class ToolQMC(ConstraintTool):
             exclude=self.coverspace,
             sysfile=self.sysfile,
             output_prefix=self.output_prefix,
-            constraint_class=OrClause if self.format == Format.DNF else AndClause,
+            constraint_class=OrClause,  # even in CNF we first cover the complement with Or clauses, then flip
         )
 
         self.force = args.force
@@ -165,7 +165,7 @@ class ToolQMC(ConstraintTool):
             raise RuntimeError()
 
         if typ.type_good in (TypeGood.LOWER, TypeGood.UPPER):
-            self.log.warning(f"expanding {typ.type_good.value} set into EXPLICIT")
+            self.log.warning(f"expanding {typ.type_good.value} include set into EXPLICIT")
 
             if (self.format == Format.CNF) ^ (typ.type_good == TypeGood.LOWER):
                 self.coverspace = to_upper(self.coverspace)
@@ -177,7 +177,7 @@ class ToolQMC(ConstraintTool):
                 raise RuntimeError()
 
     @TimeStat.log
-    def MaxCubes(self, algorithm="Dense3", checks=True):
+    def MaxCubes(self, algorithm="Dense3", checks=0):
         if algorithm == "Sparse":
             raise NotImplementedError(
                 "MaxCubes:Sparse not implemented, use MaxCubes:Dense2 or MaxCubes:Dense3"
@@ -280,7 +280,7 @@ def to_upper(P):
 
 
 def main():
-    return ToolQMC().main()
+    return ToolBoolean().main()
 
 
 if __name__ == '__main__':

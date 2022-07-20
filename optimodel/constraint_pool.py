@@ -120,6 +120,9 @@ class ConstraintPool:
         )
 
         self._constraints = None
+        self.system_lower = None
+        self.system_upper = None
+
         self.cons2i = None
 
         self.best_subset_size = 1111111111111111111  # inf
