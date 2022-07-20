@@ -125,7 +125,8 @@ class ConstraintPool:
 
         self.cons2i = None
 
-        self.best_subset_size = 1111111111111111111  # inf
+        self.best_subset_size_ub = 1111111111111111111  # inf
+        self.best_subset_size_lb = 1  # inf
         self.best_subset = None
 
         self.output_prefix = output_prefix
@@ -201,6 +202,8 @@ class ConstraintPool:
             for pti, lst in enumerate(by_bad):
                 assert lst, "no solutions"
                 print(pti, len(lst), *lst, file=f)
+
+        subprocess.check_call(["bzip2", "-k", filename])
 
     def write_subset_milp(self, filename, solver=None):
         assert filename.endswith(".lp")
@@ -279,7 +282,14 @@ class ConstraintPool:
             milp.add_constraint(((v, 1) for v in lst), lb=1)
 
         # minimize number of ineqs
-        milp.set_objective((v, 1) for v in v_take_ineq)
+        # todo: compute better lb (is it helpful?)
+        obj = [(v, 1) for v in v_take_ineq]
+        milp.set_objective(obj)
+        if self.best_subset_size_ub < 1111111111111111111:
+            self.log.info(f"adding previous upper bound {self.best_subset_size_ub}")
+            milp.add_constraint(obj, lb=1, ub=self.best_subset_size_ub)
+        else:
+            milp.add_constraint(obj, lb=1, ub=self.best_subset_size_ub)
         return v_take_ineq, milp
 
     def subset_by_milp(self, lp_output=None, solver=None):
@@ -389,19 +399,19 @@ class ConstraintPool:
         if optimal:
             filename += ".opt"
 
-        if len(constraints) < self.best_subset_size:
-            self.best_subset_size = len(constraints)
+        if len(constraints) < self.best_subset_size_ub:
+            self.best_subset_size_ub = len(constraints)
             self.best_subset = constraints
-        elif len(constraints) == self.best_subset_size \
+        elif len(constraints) == self.best_subset_size_ub \
              and optimal \
              and not os.path.isfile(filename):
             # perhaps was not known that it's optimal, let's write down to .opt
-            self.best_subset_size = len(constraints)
+            self.best_subset_size_ub = len(constraints)
             self.best_subset = constraints
         else:
             self.log.info(
                 "skipping sol with"
-                f" {len(constraints)} >= {self.best_subset_size}"
+                f" {len(constraints)} >= {self.best_subset_size_ub}"
                 f" constraints, from {source}"
             )
             return

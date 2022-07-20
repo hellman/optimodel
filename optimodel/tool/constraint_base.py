@@ -10,6 +10,7 @@ AutoSmall = (
 AutoMedium = (
     "SubsetWriteGecco:",
     "SubsetWriteMILP:solver=swiglpk",
+
     "SubsetSCS:algorithm=greedy,timeout=10",
     "SubsetSCS:algorithm=greedy_lin,timeout=10",
     "SubsetSCS:algorithm=greedy_dual,timeout=10",
@@ -17,21 +18,35 @@ AutoMedium = (
     "SubsetSCS:algorithm=localsearch_rowweighting_2,timeout=10",
     "SubsetSCS:algorithm=largeneighborhoodsearch,timeout=10",
     "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=10",
-    "SubsetMILP:",
+
+    "SubsetWriteMILP:solver=swiglpk",
 )
 
 AutoLarge = (
     "SubsetWriteGecco:",
     "SubsetWriteMILP:solver=swiglpk",
-    # "SubsetGreedy:",
-    "SubsetSCS:algorithm=greedy",
-    "SubsetSCS:algorithm=greedy_lin",
-    "SubsetSCS:algorithm=greedy_dual",
+
+    "SubsetSCS:algorithm=greedy,timeout=10",
+    "SubsetSCS:algorithm=greedy_lin,timeout=10",
+    "SubsetSCS:algorithm=greedy_dual,timeout=10",
+    "SubsetSCS:algorithm=localsearch_rowweighting,timeout=10",
+    "SubsetSCS:algorithm=localsearch_rowweighting_2,timeout=10",
+    "SubsetSCS:algorithm=largeneighborhoodsearch,timeout=10",
     "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=10",
-    "SubsetSCS:algorithm=localsearch_rowweighting,timeout=120",
-    "SubsetSCS:algorithm=localsearch_rowweighting_2,timeout=120",
-    "SubsetSCS:algorithm=largeneighborhoodsearch,timeout=120",
+
+    "SubsetSCS:algorithm=localsearch_rowweighting_2,timeout=300",
     "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=300",
+
+    "SubsetWriteMILP:solver=swiglpk",
+
+    # "SubsetGreedy:",
+    # "SubsetSCS:algorithm=greedy",
+    # "SubsetSCS:algorithm=greedy_lin",
+    # "SubsetSCS:algorithm=greedy_dual",
+    # "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=10",
+    # "SubsetSCS:algorithm=localsearch_rowweighting,timeout=120",
+    # "SubsetSCS:algorithm=localsearch_rowweighting_2,timeout=120",
+    # "SubsetSCS:algorithm=largeneighborhoodsearch,timeout=120",
     #"SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=100,iterations=36",  # 1 hour
     #"SubsetMILP:",
 )
@@ -53,15 +68,15 @@ class ConstraintTool(BaseTool):
     def AutoSelect(self):
         n_sets = len(self.pool.constraints)
         n_vars = len(self.pool.exclude)
-        mx = min(n_sets, n_vars)
+        param = min(n_sets, n_vars)
 
         self.log.info(f"AutoSelect with {n_sets} sets and {n_vars} elements")
 
-        if mx < 400:
+        if param < 400:
             self.log.info("using AutoSmall preset")
             return self.AutoSmall()
 
-        if mx < 2500:
+        if param < 1500:
             self.log.info("using AutoMedium preset")
             return self.AutoMedium()
 
