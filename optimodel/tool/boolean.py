@@ -5,15 +5,19 @@ from enum import Enum
 from time import time
 
 from binteger import Bin
+from subsets import DenseSet
+
+from subsets.max_cubes import MaxCubes_Dense2
+from subsets.max_cubes import MaxCubes_Dense3
+
 from monolearn.SparseSet import SparseSet
 from monolearn.utils import TimeStat
 
-from subsets.misc import Quine_McCluskey_Step1_Dense2
-from subsets.misc import Quine_McCluskey_Step1_Dense3
-
-from optimodel.constraint_pool import ConstraintPool, read_set
+from optimodel.constraint_pool import ConstraintPool
 from optimodel.clause import AndClause, OrClause
+
 from optimodel.tool.constraint_base import ConstraintTool
+from optimodel.tool.set_files import read_set, SetType, TypeGood
 from optimodel.tool.base import complement_binary
 
 import justlogs
@@ -27,8 +31,8 @@ except ImportError:
 
 
 AutoDefault = (
-    #"QmC:Sparse",
-    "QmC:Dense3",
+    #"MaxCubes:Sparse",
+    "MaxCubes:Dense3",
     "AutoSelect",
 )
 
@@ -42,6 +46,19 @@ class ToolQMC(ConstraintTool):
     KIND = "clause"
 
     log = logging.getLogger(__name__)
+
+    def __init__(self):
+        # please the linter
+        self.args = None
+        self.format = None
+        self.fileprefix = None
+        self.output_prefix = None
+        self.dontcare = None
+        self.sysfile = None
+        self.coverspace = None
+        self.cubespace = None
+        self.pool = None
+        self.force = None
 
     def main(self):
         justlogs.setup(level="INFO")
@@ -70,7 +87,7 @@ class ToolQMC(ConstraintTool):
         parser.add_argument(
             "fileprefix", type=str,
             help="File prefix "
-            "(files with appended `feasible.bz2` or `infeasible.bz2` must exist)"
+            "(files with appended `type`, `feasible.bz2` or `infeasible.bz2` must exist)"
         )
         parser.add_argument(
             "commands", type=str, nargs="*",
@@ -95,40 +112,20 @@ class ToolQMC(ConstraintTool):
         self.dontcare = args.dontcare
         self.sysfile = self.output_prefix + "system"
 
-        if self.format == Format.CNF:
-            self.log.info("CNF format: using excluded set")
+        try:
+            typ = SetType.read_from_file(self.fileprefix + "type")
+        except FileNotFoundError:
+            raise FileNotFoundError(f"type file not found: {self.fileprefix + 'type'}")
 
-            self.coverspace = read_set(self.fileprefix + "exclude")
-            if self.dontcare:
-                self.cubespace = \
-                    complement_binary(read_set(self.fileprefix + "include"))
-            else:
-                self.cubespace = self.coverspace
+        self.read_sets(typ)
 
-            self.pool = ConstraintPool(
-                include=None,
-                exclude=self.coverspace,
-                sysfile=self.sysfile,
-                output_prefix=self.output_prefix,
-                constraint_class=AndClause,
-            )
-        elif self.format == Format.DNF:
-            self.log.info("DNF format: using included set")
-
-            self.coverspace = read_set(self.fileprefix + "include")
-            if self.dontcare:
-                self.cubespace = \
-                    complement_binary(read_set(self.fileprefix + "exclude"))
-            else:
-                self.cubespace = self.coverspace
-
-            self.pool = ConstraintPool(
-                include=None,
-                exclude=self.coverspace,
-                sysfile=self.sysfile,
-                output_prefix=self.output_prefix,
-                constraint_class=OrClause,
-            )
+        self.pool = ConstraintPool(
+            include=None,
+            exclude=self.coverspace,
+            sysfile=self.sysfile,
+            output_prefix=self.output_prefix,
+            constraint_class=OrClause if self.format == Format.DNF else AndClause,
+        )
 
         self.force = args.force
 
@@ -143,16 +140,52 @@ class ToolQMC(ConstraintTool):
 
         self.log_time_stats(header="Finished")
 
+    def read_sets(self, typ: TypeGood):
+        if self.format == Format.CNF:
+            self.log.info("CNF format: using excluded set")
+
+            self.coverspace = read_set(self.fileprefix + "exclude")
+            if self.dontcare:
+                self.cubespace = \
+                    complement_binary(read_set(self.fileprefix + "include"))
+            else:
+                self.cubespace = self.coverspace
+
+        elif self.format == Format.DNF:
+            self.log.info("DNF format: using included set")
+
+            self.coverspace = read_set(self.fileprefix + "include")
+            if self.dontcare:
+                self.cubespace = \
+                    complement_binary(read_set(self.fileprefix + "exclude"))
+            else:
+                self.cubespace = self.coverspace
+
+        else:
+            raise RuntimeError()
+
+        if typ.type_good in (TypeGood.LOWER, TypeGood.UPPER):
+            self.log.warning(f"expanding {typ.type_good.value} set into EXPLICIT")
+
+            if (self.format == Format.CNF) ^ (typ.type_good == TypeGood.LOWER):
+                self.coverspace = to_upper(self.coverspace)
+                self.cubespace = to_upper(self.cubespace)
+            elif (self.format == Format.DNF) ^ (typ.type_good == TypeGood.UPPER):
+                self.coverspace = to_lower(self.coverspace)
+                self.cubespace = to_lower(self.cubespace)
+            else:
+                raise RuntimeError()
+
     @TimeStat.log
-    def QmC(self, algorithm="Dense3", checks=True):
+    def MaxCubes(self, algorithm="Dense3", checks=True):
         if algorithm == "Sparse":
             raise NotImplementedError(
-                "QmC:Sparse not implemented, use QmC:Dense2 or QmC:Dense3"
+                "MaxCubes:Sparse not implemented, use MaxCubes:Dense2 or MaxCubes:Dense3"
             )
         elif algorithm == "Dense2":
-            QMC = Quine_McCluskey_Step1_Dense2
+            QMC = MaxCubes_Dense2
         elif algorithm == "Dense3":
-            QMC = Quine_McCluskey_Step1_Dense3
+            QMC = MaxCubes_Dense3
         else:
             raise NotImplementedError(algorithm)
 
@@ -163,7 +196,7 @@ class ToolQMC(ConstraintTool):
 
         self.log.info(f"calling Quine-McCluskey algorithm {QMC.__name__}")
         t0 = time()
-        cubes = TimeStat(QMC)(self.cubespace)
+        cubes = TimeStat.log(QMC)(self.cubespace)
         t = time() - t0
         self.log.info("done Quine-McCluskey")
         self.log.info(
@@ -191,7 +224,6 @@ class ToolQMC(ConstraintTool):
             cube = rem_clause.solutions(n).to_Bins()
 
             if checks:
-                from subsets import DenseSet
                 d = DenseSet(n)
                 d.set(u.int)
                 d.do_LowerSet()
@@ -225,6 +257,26 @@ class ToolQMC(ConstraintTool):
         if self.format == Format.DNF:
             clause = ~clause
         return super()._output_one(clause)
+
+
+def to_lower(P):
+    for v in P:
+        n = len(v)
+        break
+    else:
+        return []
+    P = [Bin(v, n).int for v in P]
+    return [v.tuple for v in DenseSet(n, P).LowerSet().to_Bins()]
+
+
+def to_upper(P):
+    for v in P:
+        n = len(v)
+        break
+    else:
+        return []
+    P = [Bin(v, n).int for v in P]
+    return [v.tuple for v in DenseSet(n, P).UpperSet().to_Bins()]
 
 
 def main():

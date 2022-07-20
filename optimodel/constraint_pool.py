@@ -90,12 +90,12 @@ class ConstraintPool:
         self.include = (sorted(self.reorient_point(v, direction) for v in include)
                         if include is not None else None)
 
-        hi = hash_sorted_points(self.include)
+        hi = hash_sorted_points(self.include) if self.include is not None else -1
         he = hash_sorted_points(self.exclude)
 
         li = len(self.include) if self.include is not None else "(not given)"
-        self.log.info(f"exclude: {len(self.exclude):11} points, hash {hi}")
-        self.log.info(f"include: {li:11} points, hash {he}")
+        self.log.info(f"exclude: {len(self.exclude):11} points, hash {he}")
+        self.log.info(f"include: {li:11} points, hash {hi}")
 
         self.i2exc = sorted(self.exclude)
         self.exc2i = {p: i for i, p in enumerate(self.i2exc)}
