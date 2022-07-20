@@ -11,13 +11,15 @@ AutoMedium = (
     "SubsetWriteGecco:",
     "SubsetWriteMILP:solver=swiglpk",
 
-    "SubsetSCS:algorithm=greedy,timeout=10",
-    "SubsetSCS:algorithm=greedy_lin,timeout=10",
-    "SubsetSCS:algorithm=greedy_dual,timeout=10",
-    "SubsetSCS:algorithm=localsearch_rowweighting,timeout=10",
-    "SubsetSCS:algorithm=localsearch_rowweighting_2,timeout=10",
-    "SubsetSCS:algorithm=largeneighborhoodsearch,timeout=10",
-    "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=10",
+    # to give good baseline
+    "SubsetSCS:largeneighborhoodsearch_2,timeout=10",
+    "SubsetSCS:localsearch_rowweighting,timeout=10",
+
+    # usuall worse, but fast (don't actually take 10sec)
+    # so worth keeping
+    "SubsetSCS:greedy,timeout=10",
+    "SubsetSCS:greedy_lin,timeout=10",
+    "SubsetSCS:greedy_dual,timeout=10",
 
     "SubsetWriteMILP:solver=swiglpk",
 )
@@ -26,17 +28,27 @@ AutoLarge = (
     "SubsetWriteGecco:",
     "SubsetWriteMILP:solver=swiglpk",
 
-    "SubsetSCS:algorithm=greedy,timeout=10",
-    "SubsetSCS:algorithm=greedy_lin,timeout=10",
-    "SubsetSCS:algorithm=greedy_dual,timeout=10",
-    "SubsetSCS:algorithm=localsearch_rowweighting,timeout=10",
-    "SubsetSCS:algorithm=localsearch_rowweighting_2,timeout=10",
-    "SubsetSCS:algorithm=largeneighborhoodsearch,timeout=10",
-    "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=10",
+     # to give good baseline
+    "SubsetSCS:largeneighborhoodsearch_2,timeout=10",
+    "SubsetSCS:localsearch_rowweighting,timeout=10",
 
-    "SubsetSCS:algorithm=localsearch_rowweighting_2,timeout=300",
-    "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=300",
+    # usuall worse, but fast (don't actually take 10sec)
+    # so worth keeping
+    "SubsetSCS:greedy,timeout=10",
+    "SubsetSCS:greedy_lin,timeout=10",
+    "SubsetSCS:greedy_dual,timeout=10",
 
+    # just in case
+    "SubsetSCS:localsearch_rowweighting,timeout=10",
+    "SubsetSCS:localsearch_rowweighting_2,timeout=10",
+    "SubsetSCS:largeneighborhoodsearch,timeout=10",
+    "SubsetSCS:largeneighborhoodsearch_2,timeout=10",
+
+    # main artillery
+    "SubsetSCS:localsearch_rowweighting_2,timeout=300",
+    "SubsetSCS:largeneighborhoodsearch_2,timeout=300",
+
+    # write LP with updated bound
     "SubsetWriteMILP:solver=swiglpk",
 
     # "SubsetGreedy:",
