@@ -18,6 +18,7 @@ The main part requires the `subsets` python module based on C++, which requires 
 
 ```bash
 apt install swig g++ python-dev
+pip install wheel
 pip install optimodel
 ```
 
@@ -26,7 +27,7 @@ The tool uses both SAT-solvers and MILP-optimizers, so you need to install somet
 **Note:** currently, they are listed as requirements for optisolveapi and will be installed automatically.
 
 ```bash
-apt install glpk-utils libglpk-dev  # not sure if needed
+apt install glpk-utils libglpk-dev
 pip install python-sat[pblib,aiger] swiglpk
 ```
 
@@ -47,8 +48,8 @@ pip install python-sat[pblib,aiger]
 
 ### MILP: [GLPK](https://www.gnu.org/software/glpk/) (open source)
 
+- install GLPK solver: `apt install glpk-utils libglpk-dev`
 - install python bindings: `pip install swiglpk`
-- (optional?) install GLPK solver: `apt install glpk-utils`
 
 ### MILP: [Gurobi](https://www.gurobi.com/) (commercial, free academic licenses)
 
