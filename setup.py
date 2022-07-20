@@ -20,7 +20,7 @@ setup(
     python_requires='>=3.5,<4.0',
     install_requires=[
         'binteger',
-        'subsets',
+        'subsets>=1.1.0',
         'optisolveapi',
         'monolearn',
         'justlogs',
@@ -28,8 +28,9 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'optimodel.milp = optimodel.tool_milp:main',
-            'optimodel.verify_milp = optimodel.tool_verify:tool_verify_milp',
+            'optimodel.milp = optimodel.tool.milp:main',
+            'optimodel.boolean = optimodel.tool.boolean:main',
+            'optimodel.verify_milp = optimodel.tool.verify_milp:main',
         ]
     },
 )
