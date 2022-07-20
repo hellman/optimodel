@@ -30,9 +30,9 @@ AutoLarge = (
     "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=10",
     "SubsetSCS:algorithm=localsearch_rowweighting,timeout=120",
     "SubsetSCS:algorithm=localsearch_rowweighting_2,timeout=120",
-    # "SubsetSCS:algorithm=largeneighborhoodsearch,timeout=120",
+    "SubsetSCS:algorithm=largeneighborhoodsearch,timeout=120",
     "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=300",
-    "SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=100,iterations=36",  # 1 hour
+    #"SubsetSCS:algorithm=largeneighborhoodsearch_2,timeout=100,iterations=36",  # 1 hour
     #"SubsetMILP:",
 )
 
