@@ -110,7 +110,7 @@ class ToolBoolean(ConstraintTool):
         self.log.info(args)
 
         self.dontcare = args.dontcare
-        self.sysfile = self.output_prefix + "system"
+        self.sysfile = self.output_prefix + "system.bz2"
 
         try:
             typ = SetType.read_from_file(self.fileprefix + "type")

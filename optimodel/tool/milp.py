@@ -89,7 +89,7 @@ class ToolMILP(ConstraintTool):
         self.log.info(args)
         self.log.info(f"using output prefix {self.output_prefix}")
 
-        self.sysfile = self.output_prefix + "system"
+        self.sysfile = self.output_prefix + "system.bz2"
 
         include = read_set(self.fileprefix + "include")
         exclude = read_set(self.fileprefix + "exclude")
