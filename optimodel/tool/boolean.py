@@ -167,10 +167,10 @@ class ToolBoolean(ConstraintTool):
         if typ.type_good in (TypeGood.LOWER, TypeGood.UPPER):
             self.log.warning(f"expanding {typ.type_good.value} include set into EXPLICIT")
 
-            if (self.format == Format.CNF) ^ (typ.type_good == TypeGood.LOWER):
+            if (self.format == Format.CNF) ^ (typ.type_good == TypeGood.UPPER):
                 self.coverspace = to_upper(self.coverspace)
                 self.cubespace = to_upper(self.cubespace)
-            elif (self.format == Format.DNF) ^ (typ.type_good == TypeGood.UPPER):
+            elif (self.format == Format.CNF) ^ (typ.type_good == TypeGood.LOWER):
                 self.coverspace = to_lower(self.coverspace)
                 self.cubespace = to_lower(self.cubespace)
             else:
