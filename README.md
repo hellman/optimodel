@@ -171,11 +171,35 @@ $ cat example_present_ddt/ineq.16.opt
 ...
 ```
 
+### Advanced usage
 
+Under the hood, the tools run a sequence of commands, such as algorithms to generate complete systems of covers, commands to write down the final minimization problem as a set cover problem or as a MILP problem, etc.
 
+By default, the tools use hardcoded sequences of commands depending on the problem size. This should work well for small-medium problems (using the GLPK solver), but for larger problems may not work fully automatically.
+
+For finding the complete covering system of constraints, there are currently two methods:
+
+1. `optimodel.milp set/ AutoSimple` , which learns the feasibility of removing of each **pair** of points (command `Learn:LevelLearn,levels_lower=3`), and then uses the Gainanov's monotone learning with the Cadical SAT solver (command `Learn:GainanovSAT,sense=min,save_rate=100,solver=pysat/cadical`), followed by automatic minimization step, see below.
+
+2. `optimodel.milp set/ AutoShifts` uses the advanced technique by finding all maximal removable sets per each **direction** and then merging them together (command `ShiftLearn:threads=7`); it requires the learning configuration to be set using `AutoChain` command (alias for `Chain:LevelLearn,levels_lower=3` and `Chain:GainanovSAT,sense=min,save_rate=100,solver=pysat/cadical`).
+
+Then, the minimal set of constraints can be selected using several ways:
+
+1. `SubsetMILP:` directly solves the problem using available solver API (typically GLPK), can be modified to use particular solver, eg.g. `SubsetMILP:solver=gurobi`
+2. `SubsetWriteMILP:solver=swiglpk` writes the minimization problem into an LP file (the solver is only used for creating and writing the problem)
+3. `SubsetSCS:` directly solves the problem (heuristically) using the [setcoveringsolver](https://github.com/fontanf/setcoveringsolver) (needs to be installed in the system), different algorithms are possible
+4. `SubsetWriteGecco:` writes the minimization problem into a Gecco file (set covering problem instance).
+
+Options 2 and 4 also create `.meta` file which connects the minimization problem to the LP/Gecco instance, so that a solution can be mapped back (tool NOT IMPLEMENTED YET). In the meta-file, each line contains:
+
+(constraint ID) (points it removes) (constraint: inequality/clause) (is it pre-selected? 1/0 for yes/no)
+
+<!--
 ## Results
 
 See [optimodel-results](https://github.com/hellman/optimodel-results).
+-->
+
 
 ## Citation
 

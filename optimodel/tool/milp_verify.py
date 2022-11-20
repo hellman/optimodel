@@ -19,8 +19,10 @@ try:
 except ImportError:
     pass
 
-
 def tool_verify_milp_main():
+
+    # OUTDATED, NEE TO UPDATE FOR NEW API
+
     log = logging.getLogger(__name__)
     TOOL = os.path.basename(sys.argv[0])
 

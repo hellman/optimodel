@@ -30,7 +30,7 @@ setup(
         'console_scripts': [
             'optimodel.milp = optimodel.tool.milp:main',
             'optimodel.boolean = optimodel.tool.boolean:main',
-            'optimodel.verify_milp = optimodel.tool.verify_milp:main',
+            #'optimodel.verify_milp = optimodel.tool.verify_milp:main',
         ]
     },
 )
