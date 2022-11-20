@@ -4,11 +4,18 @@ This repository contains a toolkit for minimizing constraint systems (CNF/DNF/MI
 
 **Warning:** small constraint systems do not imply better performance (although may have some correlation on practice).
 
+**Warning:** the project is in its early stages under development, things may break/not work, be unclear, etc.
+
 The code is based on the paper ([ia.cr/2021/1099](https://ia.cr/2021/1099)) by Aleksei Udovenko titled
 
 > *MILP modeling of Boolean functions by minimum number of inequalities*.
 
 <!-- Many datasets, results and benchmarks are available in a separate repository [optimodel-results](https://github.com/hellman/optimodel-results). -->
+
+Based on closely related packages
+- [monolearn](https://github.com/hellman/monolearn) - generic monotone learning, and
+- [optisolveapi](https://github.com/hellman/optisolveapi) - efficient SAT/MILP APIs).
+
 
 ## Installation
 
