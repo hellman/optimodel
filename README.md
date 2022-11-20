@@ -8,7 +8,7 @@ The code is based on the paper ([ia.cr/2021/1099](https://ia.cr/2021/1099)) by A
 
 > *MILP modeling of Boolean functions by minimum number of inequalities*.
 
-Many datasets, results and benchmarks are available in a separate repository [optimodel-results](https://github.com/hellman/optimodel-results).
+<!-- Many datasets, results and benchmarks are available in a separate repository [optimodel-results](https://github.com/hellman/optimodel-results). -->
 
 ## Installation
 
