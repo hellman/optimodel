@@ -22,6 +22,7 @@ AutoMedium = (
     "SubsetSCS:greedy_dual,timeout=10",
 
     "SubsetWriteMILP:solver=swiglpk",
+    "SubsetMILP:solver=gurobi",
 )
 
 AutoLarge = (
