@@ -4,7 +4,7 @@ from distutils.core import setup
 setup(
     name='optimodel',
     version='0.2.0',
-    packages=["optimodel"],
+    packages=["optimodel", "optimodel.tool"],
 
     url=None,
     license="MIT",
