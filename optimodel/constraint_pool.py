@@ -388,7 +388,7 @@ class ConstraintPool:
     def report(self, constraints, source, limit=50, optimal=False):
         self.log.info(
             f"got {len(constraints)} constraints"
-            f"from {source} (optimal? {optimal}"
+            f"from {source} (optimal? {optimal})"
         )
 
         if not self.output_prefix:
