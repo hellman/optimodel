@@ -203,7 +203,7 @@ class ConstraintPool:
                 assert lst, "no solutions"
                 print(pti, len(lst), *lst, file=f)
 
-        subprocess.check_call(["bzip2", "-k", filename])
+        subprocess.check_call(["bzip2", "-fk", filename])
 
     def write_subset_milp(self, filename, solver=None):
         assert filename.endswith(".lp")
