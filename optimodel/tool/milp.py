@@ -66,6 +66,12 @@ class ToolMILP(ConstraintTool):
         """.strip(), formatter_class=RawTextHelpFormatter)
 
         parser.add_argument(
+            "--lp-solver", type=str,
+            help="LP Oracle Solver",
+            default="swiglpk",
+        )
+
+        parser.add_argument(
             "fileprefix", type=str,
             help="Sets prefix "
             "(files with appended .good.set, .bad.set, .type_good must exist)",
@@ -128,7 +134,10 @@ class ToolMILP(ConstraintTool):
             output_prefix=self.output_prefix,
             constraint_class=Inequality,
         )
-        self.oracle = LPbasedOracle(pool=self.pool)
+        args.lp_solver = args.lp_solver.lower()
+        if args.lp_solver == "none":
+            args.lp_solver = None
+        self.oracle = LPbasedOracle(pool=self.pool, solver=args.lp_solver)
 
         commands = args.commands
         if self.pool.is_upper:
