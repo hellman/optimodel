@@ -30,13 +30,13 @@ AutoSimple = (
     "Learn:LevelLearn,levels_lower=3",
     # "Learn:RandomLower:max_repeat_rate=3",
     # min vs None?
-    "Learn:GainanovSAT,sense=min,save_rate=100,solver=pysat/cadical",
+    "Learn:GainanovSAT,sense=min,save_rate=100,solver=pysat/cadical195",
     "AutoSelect",
 )
 
 AutoChain = (
     "Chain:LevelLearn,levels_lower=3",
-    "Chain:GainanovSAT,sense=min,save_rate=100,solver=pysat/cadical",
+    "Chain:GainanovSAT,sense=min,save_rate=100,solver=pysat/cadical195",
 )
 
 AutoShifts = (
