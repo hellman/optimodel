@@ -1,1 +1,5 @@
 build/
+example_present_ddt/shifts
+example_present_ddt/log*
+example_present_ddt/ineq*
+present/
