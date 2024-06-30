@@ -62,7 +62,7 @@ class ConstraintPool:
         is_upper: bool = False,  # include is a upper set (max-set or explicit)
                                  # or generic explicit?
                                  # (after redirection)
-        use_point_prec: bool = False,
+        use_point_prec: bool = False,  # bool or type
         sysfile: str = None,
         output_prefix: str = None,
         constraint_class: type = None,
@@ -102,9 +102,14 @@ class ConstraintPool:
 
         self.N = len(self.exclude)
 
-        if use_point_prec:
+        if isinstance(use_point_prec, bool) and use_point_prec:
             assert self.is_upper
             ep = ExtraPrec_LowerSet(
+                int2point=self.i2exc,
+                point2int=self.exc2i,
+            )
+        elif use_point_prec:
+            ep = use_point_prec(
                 int2point=self.i2exc,
                 point2int=self.exc2i,
             )
