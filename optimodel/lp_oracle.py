@@ -12,11 +12,11 @@ class LPbasedOracle(Oracle):
 
         self.solver = solver
         self.n_calls = 0
-        self.milp = None
+        self.model = None
         self.pool = pool
 
     def _prepare_constraints(self):
-        self.milp = MILP.feasibility(solver=self.solver)
+        self.model = MILP.feasibility(solver=self.solver)
 
         if self.pool.is_upper:
             lb = 0  # monotone => nonnegative
@@ -26,15 +26,15 @@ class LPbasedOracle(Oracle):
         # set ub = 1000+ ? ...
         self.xs = []
         for i in range(self.pool.n):
-            self.xs.append(self.milp.var_real("x%d" % i, lb=lb, ub=None))
+            self.xs.append(self.model.var_real("x%d" % i, lb=lb, ub=None))
 
-        self.c = self.milp.var_real("c", lb=lb, ub=None)
+        self.c = self.model.var_real("c", lb=lb, ub=None)
         self.xsc = self.xs + [self.c]
 
         for p in self.pool.include:
             # ... >= c
             # ... -c >= 0
-            self.milp.add_constraint(
+            self.model.add_constraint(
                 zip(self.xsc, p + (-1,)),
                 lb=0,
             )
@@ -55,12 +55,12 @@ class LPbasedOracle(Oracle):
             ineq = Inequality((0,) * self.pool.n + (0,))
             return True, ineq
 
-        if self.milp is None:
+        if self.model is None:
             self._prepare_constraints()
 
         self.n_calls += 1
 
-        LP = self.milp
+        LP = self.model
         cs = [LP.add_constraint(**self.i2cs[i]) for i in bads]
         res = LP.optimize(log=0)
         LP.remove_constraints(cs)
