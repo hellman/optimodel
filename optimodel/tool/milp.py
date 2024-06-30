@@ -67,7 +67,7 @@ class ToolMILP(ConstraintTool):
 
         parser.add_argument(
             "--lp-solver", type=str,
-            help="LP Oracle Solver",
+            help="LP Oracle Solver. Best are swiglpk or gurobi.",
             default="swiglpk",
         )
 
