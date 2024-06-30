@@ -65,7 +65,7 @@ class LPbasedOracle(Oracle):
         res = LP.optimize(log=0)
         LP.remove_constraints(cs)
 
-        if res is False:
+        if res is False or res is None:
             return False, None
 
         sol = LP.solutions[0]
