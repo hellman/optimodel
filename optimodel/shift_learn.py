@@ -101,7 +101,7 @@ class ShiftLearn:
         self.pool.system.save()
 
     def worker(self, shift: Bin):
-        TimeStat.clear_all()
+        TimeStat.reset_all()
         core, solutions = self.process_origin(shift)
         return shift, core, solutions, TimeStat.Stat
 

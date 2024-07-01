@@ -77,6 +77,8 @@ class ConstraintTool(BaseTool):
     lp_written = None
     meta_written = None
 
+    pool = NotImplemented  # instance attribute
+
     @TimeStat.log
     def AutoSelect(self):
         n_sets = len(self.pool.constraints)
