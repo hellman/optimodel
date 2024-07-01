@@ -1,3 +1,4 @@
+import sys
 from time import time
 
 
@@ -11,6 +12,9 @@ class BaseTool:
         self.log.info("\n")
         self.log.info("=" * 40)
         self.log.info(f"running command {method} {args} {kwargs}")
+        if not hasattr(self, method):
+            print("command", method, "unknown, exiting", file=sys.stderr)
+            sys.exit(1)
         ret = getattr(self, method)(*args, **kwargs)
         t = time() - t0
         self.log.info(f"command {method} returned {ret} in {t:.2f} seconds")
