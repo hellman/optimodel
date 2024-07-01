@@ -10,6 +10,7 @@ from subsets import DenseSet
 from monolearn.SparseSet import SparseSet
 
 from monolearn import Modules as LearnModules
+from monolearn.utils import TimeStat
 
 from optimodel.constraint_pool import ConstraintPool
 from optimodel.lp_oracle import LPbasedOracle
@@ -76,7 +77,13 @@ class ShiftLearn:
             global HACK
             HACK = self
             p = multiprocessing.Pool(processes=threads)
-            for new_origin, core, solutions in p.imap_unordered(worker, shifts):
+            for result in p.imap_unordered(worker, shifts):
+                new_origin, core, solutions, time_stat = result
+
+                # merge time logs
+                for name, stat in time_stat.items():
+                    TimeStat.Stat[name].merge(stat)
+
                 self.log.info(f"merging solutions of new_origin {new_origin}")
                 for vec in solutions:
                     if vec not in self.core:
@@ -85,6 +92,7 @@ class ShiftLearn:
                     self.counts[vec] += 1
                 self.solutions.update(solutions)
 
+    @TimeStat.log
     def compose(self):
         self.log.info("composing")
         for vec, ineq in self.solutions.items():
@@ -93,8 +101,9 @@ class ShiftLearn:
         self.pool.system.save()
 
     def worker(self, shift: Bin):
+        TimeStat.clear_all()
         core, solutions = self.process_origin(shift)
-        return shift, core, solutions
+        return shift, core, solutions, TimeStat.Stat
 
     def process_origin(self, new_origin: Bin):
         subpool = self.process_origin_get_subpool(new_origin)
@@ -102,6 +111,7 @@ class ShiftLearn:
         core, solutions = self.extract_subpool_solutions(subpool)
         return core, solutions
 
+    @TimeStat.log
     def process_origin_get_subpool(self, origin: tuple[int]):
         shift = Bin(origin)
         direction = [-1 if v == 1 else 1 for v in origin]
@@ -143,6 +153,7 @@ class ShiftLearn:
         self.learn_origin(subpool)
         return subpool
 
+    @TimeStat.log
     def learn_origin(self, subpool):
         for module, args, kwargs in self.learn_chain:
             if module not in LearnModules:
@@ -153,6 +164,7 @@ class ShiftLearn:
             self.module.init(system=subpool.system, oracle=oracle)
             self.module.learn()
 
+    @TimeStat.log
     def extract_subpool_solutions(self, subpool):
         solutions = {}
         core = {}
