@@ -1,10 +1,13 @@
 import sys
+import logging
+
 from time import time
+from binteger import Bin
 
 
 class BaseTool:
     output_prefix = NotImplemented
-    log = NotImplemented
+    log = logging.getLogger("optimodel.tool.BaseTool")
 
     def run_command_string(self, cmd):
         method, args, kwargs = parse_method(cmd)
