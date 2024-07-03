@@ -21,50 +21,28 @@ Based on closely related packages
 
 ### Main part
 
-The main part requires the `subsets` python module based on C++, which requires `swig` and a C++ compiler to be installed. Then, optimodel can be installed usig `pip` directly:
+The main part requires the `subsets` python module writtin in C++, which requires `swig` and a C++ compiler to be installed. Nowadays, swig can be installed as a python package and so will be automatically pulled as a dependency.
+
+The tool uses both SAT-solvers and MILP-optimizers, so you need to install something that is supported by the [optisolveapi](https://github.com/hellman/optisolveapi) module (currently, not much). The simplest is to use [PySAT](https://pysathq.github.io/) and [GLPK](https://www.gnu.org/software/glpk/) with low-level python bindings [swiglpk](https://github.com/biosustain/swiglpk). [Gurobi](https://gurobi.com/) is also supported if you have a license. It is mainly useful for the subset cover step on big problems.
+
+The full setup (Gurobi solver has to be installed separately) can be done as follows:
 
 ```bash
-apt install swig g++ python3-dev
-pip install wheel
-pip install optimodel
+apt install glpk-utils libglpk-dev g++ python3-dev  # also "swig" if build fails later
+pip install wheel  # not sure if needed
+pip install optimodel[glpk,pysat,scip,gurobi]  # note: this installs gurobipy; omit gurobi if on PyPy
 ```
 
-The tool uses both SAT-solvers and MILP-optimizers, so you need to install something that is supported by the [optisolveapi](https://github.com/hellman/optisolveapi) module (currently, not much..). The simplest is to install [PySAT](https://pysathq.github.io/) and [GLPK]() with low-level python bindings [swiglpk](https://github.com/biosustain/swiglpk):
-
-**Note:** currently, they are listed as requirements for optisolveapi and will be installed automatically.
-
-```bash
-apt install glpk-utils libglpk-dev
-pip install python-sat[pblib,aiger] swiglpk
-```
+The tool can be run on PyPy but there the `gurobipy` binding is not supported, so the \[gurobi\] option has to be omitted.
 
 ### Minimization part
 
-GLPK however won't work well for the final minimzation step for large functions. It is recommended to use [Gurobi](gurobi.com) (commercial, free licenses for academia) or [SCIP](https://scipopt.org/) (free, open-source). (SCIP support is currently broken in this tool, but should be fixed ASAP).
+GLPK won't work well for the final minimzation step for large functions. It is recommended to use [Gurobi](gurobi.com) (commercial, free licenses for academia) or [SCIP](https://scipopt.org/) (free, open-source). (SCIP support is currently broken in this tool, but should be fixed ASAP).
 
 Note that it is possible to write the LP file and solve manually with any external solver.
 
 Alternative is to use (unicost) SetCover solvers, which quickly derive heuristic good solutions, although without any lower bound.
 Recommendation: [setcoveringsolver](https://github.com/fontanf/setcoveringsolver) by Florian Fontan.
-
-### SAT: [PySAT]()
-
-```bash
-pip install python-sat[pblib,aiger]
-```
-
-### MILP: [GLPK](https://www.gnu.org/software/glpk/) (open source)
-
-- install GLPK solver: `apt install glpk-utils libglpk-dev`
-- install python bindings: `pip install swiglpk`
-
-### MILP: [Gurobi](https://www.gurobi.com/) (commercial, free academic licenses)
-
-- download archive
-- add `bin/` to PATH and `lib/` to LD_LIBRARY_PATH
-- install python module: `python setup.py install`
-- get license
-- activate license: `$ grbgetkey ...`
 
 <!--
 ### MILP: [SCIP Optimization Suite](https://scipopt.org/) (open source)

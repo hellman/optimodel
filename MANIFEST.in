@@ -1,0 +1,3 @@
+exclude dev/*
+exclude example_present_ddt/*
+exclude Makefile

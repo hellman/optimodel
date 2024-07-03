@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+
+[tool.setuptools]
+packages = ["optimodel", "optimodel.tool", "optimodel.gen"]
+
+[project]
+name = "optimodel"
+dynamic = ["version"]
+dependencies = [
+  'binteger',
+  'subsets',
+  'optisolveapi',
+  'monolearn',
+  'justlogs',
+]
+requires-python = ">=3.7"
+authors = [{name = "Aleksei Udovenko", email = "aleksei@affine.group"}]
+description = "Tools for generating ~shortest MILP and SAT models"
+readme = "README.md"
+license = {text = "MIT License"}
+keywords = ["minimization", "linear-programming", "milp", "cnf", "dnf", "satisfiability", "bitvectors"]
+
+[project.optional-dependencies]
+glpk = ["optisolveapi[glpk]"]
+pysat = ["optisolveapi[pysat]"]
+scip = ["optisolveapi[scip]"]
+gurobi = ["optisolveapi[gurobi]"]
+
+[project.urls]
+# Homepage = "https://example.com"
+#Documentation = "https://readthedocs.org"
+Repository = "https://github.com/hellman/optimodel"
+
+[project.scripts]
+'optimodel.milp' = 'optimodel.tool.milp:main'
+'optimodel.boolean' = 'optimodel.tool.boolean:main'
+#'optimodel.verify_milp' = optimodel.tool.verify_milp:main'
