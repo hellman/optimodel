@@ -12,9 +12,9 @@ name = "optimodel"
 dynamic = ["version"]
 dependencies = [
   'binteger',
-  'subsets',
-  'optisolveapi',
-  'monolearn',
+  'subsets>=1.1.2',
+  'optisolveapi>=0.3.1',
+  'monolearn>=0.1.1',
   'justlogs',
 ]
 requires-python = ">=3.7"
